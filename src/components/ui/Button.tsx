@@ -1,8 +1,23 @@
-import { forwardRef, type AnchorHTMLAttributes, type ButtonHTMLAttributes } from 'react';
-import { motion } from 'framer-motion';
+import { forwardRef, type ReactNode } from 'react';
+import { motion, type HTMLMotionProps } from 'framer-motion';
 import { Loader2 } from 'lucide-react';
 
 type Variant = 'primary' | 'secondary' | 'ghost';
+
+/** React DOMAttributes and Framer Motion both declare these with incompatible types. */
+type ConflictingAnimationHandlers =
+  | 'onAnimationStart'
+  | 'onAnimationEnd'
+  | 'onAnimationIteration';
+
+type ButtonProps = Omit<
+  HTMLMotionProps<'button'>,
+  ConflictingAnimationHandlers | 'variant' | 'children'
+> & {
+  variant?: Variant;
+  loading?: boolean;
+  children?: ReactNode;
+};
 
 const variants: Record<Variant, string> = {
   primary:
@@ -12,10 +27,7 @@ const variants: Record<Variant, string> = {
   ghost: 'text-zinc-400 hover:bg-white/[0.06] hover:text-white',
 };
 
-export const Button = forwardRef<
-  HTMLButtonElement,
-  ButtonHTMLAttributes<HTMLButtonElement> & { variant?: Variant; loading?: boolean }
->(function Button(
+export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button(
   { className = '', variant = 'primary', children, loading = false, disabled, ...props },
   ref
 ) {
@@ -36,11 +48,14 @@ export const Button = forwardRef<
   );
 });
 
-export function ButtonLink({
-  className = '',
-  children,
-  ...props
-}: AnchorHTMLAttributes<HTMLAnchorElement>) {
+type ButtonLinkProps = Omit<
+  HTMLMotionProps<'a'>,
+  ConflictingAnimationHandlers | 'variant' | 'children'
+> & {
+  children?: ReactNode;
+};
+
+export function ButtonLink({ className = '', children, ...props }: ButtonLinkProps) {
   return (
     <motion.a
       whileTap={{ scale: 0.98 }}
